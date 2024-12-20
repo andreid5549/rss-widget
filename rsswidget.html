@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom RSS Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .rss-widget {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 600px;
+            background-color: #f9f9f9;
+        }
+        .rss-item {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+        }
+        .rss-item h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .rss-item a {
+            text-decoration: none;
+            color: #0073e6;
+        }
+        .rss-item a:hover {
+            text-decoration: underline;
+        }
+        .rss-item p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Custom RSS Feed</h1>
+    <div id="rss-feed" class="rss-widget"></div>
+
+    <script>
+        const rssUrl = "https://news.google.com/rss?hl=ro&gl=RO&ceid=RO:ro";
+
+        async function loadRSSFeed() {
+            try {
+                const response = await fetch(rssUrl);
+                if (!response.ok) throw new Error("Failed to fetch RSS feed.");
+                const rssText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(rssText, "application/xml");
+
+                const items = xmlDoc.querySelectorAll("item");
+                const feedContainer = document.getElementById("rss-feed");
+                feedContainer.innerHTML = ""; // Clear any previous content
+
+                items.forEach(item => {
+                    const title = item.querySelector("title").textContent;
+                    const link = item.querySelector("link").textContent;
+                    const description = item.querySelector("description").textContent;
+                    const pubDate = item.querySelector("pubDate").textContent;
+
+                    const rssItem = document.createElement("div");
+                    rssItem.className = "rss-item";
+                    rssItem.innerHTML = `
+                        <h3><a href="${link}" target="_blank">${title}</a></h3>
+                        <p>${pubDate}</p>
+                        <p>${description}</p>
+                    `;
+                    feedContainer.appendChild(rssItem);
+                });
+            } catch (error) {
+                console.error("Error loading RSS feed:", error);
+                document.getElementById("rss-feed").innerText = "Failed to load RSS feed. Please check the URL or try again later.";
+            }
+        }
+
+        // Load the RSS feed when the page loads
+        loadRSSFeed();
+    </script>
+</body>
+</html>
